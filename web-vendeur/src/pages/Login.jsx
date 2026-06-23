@@ -1,0 +1,38 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
+
+export default function Login({ onLogin }) {
+  const [form, setForm] = useState({ whatsapp: '', password: '' });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const { token, user } = await api.post('/auth/login', form);
+      if (user.role !== 'vendeur') return setError('Accès réservé au vendeur');
+      onLogin(token, user);
+      navigate('/');
+    } catch (err) { setError(err.message); }
+  };
+
+  return (
+    <div style={{ maxWidth: 360, margin: '4rem auto' }}>
+      <h1>Connexion vendeur</h1>
+      <form onSubmit={submit}>
+        <div className="form-group">
+          <label>WhatsApp</label>
+          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} required />
+        </div>
+        <div className="form-group">
+          <label>Mot de passe</label>
+          <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
+        </div>
+        {error && <p style={{ color: '#EF4444', marginBottom: '.5rem' }}>{error}</p>}
+        <button type="submit" className="btn-primary" style={{ width: '100%' }}>Se connecter</button>
+      </form>
+    </div>
+  );
+}
