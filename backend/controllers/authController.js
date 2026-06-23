@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Stock = require('../models/Stock');
 const Disponibilite = require('../models/Disponibilite');
+const StockFournisseur = require('../models/StockFournisseur');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '30d' });
@@ -24,6 +25,10 @@ exports.register = async (req, res) => {
   if (role === 'vendeur') {
     await Stock.create({ vendeurId: user._id, soldeDisponible: 0, seuilAlerte: 10 });
     await Disponibilite.create({ vendeurId: user._id });
+  }
+
+  if (role === 'fournisseur') {
+    await StockFournisseur.create({ fournisseurId: user._id, soldeDisponible: 0 });
   }
 
   const token = signToken(user._id);

@@ -12,6 +12,7 @@ const tarifsRoutes = require('./routes/tarifs');
 const commandesRoutes = require('./routes/commandes');
 const stockRoutes = require('./routes/stock');
 const disponibilitesRoutes = require('./routes/disponibilites');
+const livraisonsRoutes = require('./routes/livraisons');
 
 const app = express();
 const server = http.createServer(app);
@@ -41,6 +42,7 @@ app.use('/tarifs', tarifsRoutes);
 app.use('/commandes', commandesRoutes);
 app.use('/stock', stockRoutes);
 app.use('/disponibilites', disponibilitesRoutes);
+app.use('/livraisons', livraisonsRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  role: { type: String, enum: ['client', 'vendeur'], required: true },
+  role: { type: String, enum: ['client', 'vendeur', 'fournisseur'], required: true },
   nom: { type: String, required: true, trim: true },
   prenom: { type: String, required: true, trim: true },
   whatsapp: { type: String, required: true, unique: true, trim: true },

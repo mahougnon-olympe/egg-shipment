@@ -24,4 +24,11 @@ const vendeurOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { auth, vendeurOnly };
+const fournisseurOnly = (req, res, next) => {
+  if (req.user?.role !== 'fournisseur') {
+    return res.status(403).json({ message: 'Accès réservé au fournisseur' });
+  }
+  next();
+};
+
+module.exports = { auth, vendeurOnly, fournisseurOnly };

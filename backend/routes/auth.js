@@ -5,7 +5,7 @@ const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
 router.post('/register', [
-  body('role').isIn(['client', 'vendeur']),
+  body('role').isIn(['client', 'vendeur', 'fournisseur']),
   body('nom').notEmpty(),
   body('prenom').notEmpty(),
   body('whatsapp').matches(/^\+?[0-9]{8,15}$/),
