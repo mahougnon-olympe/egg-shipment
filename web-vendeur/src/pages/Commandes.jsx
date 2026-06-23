@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { socket } from '../socket';
-import { lienWhatsApp } from '../../../../shared/whatsapp';
+import { lienWhatsApp } from '../../../shared/whatsapp';
 
 const STATUTS = {
   nouvelle: { label: 'Nouvelle', bg: '#3B82F6' },
