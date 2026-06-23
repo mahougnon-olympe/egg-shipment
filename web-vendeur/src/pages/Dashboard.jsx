@@ -20,6 +20,7 @@ const TRANSITIONS = {
 export default function Dashboard() {
   const [commandes, setCommandes] = useState([]);
   const [stock, setStock] = useState(null);
+  const [notifLivraison, setNotifLivraison] = useState(null);
   const [notifSon] = useState(() => {
     try { return new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); } catch { return null; }
   });
@@ -49,6 +50,11 @@ export default function Dashboard() {
     const onBoutique = ({ type }) => {
       if (type === 'stock_maj') api.get('/stock').then(setStock).catch(() => {});
     };
+    const onLivraison = (l) => {
+      api.get('/stock').then(setStock).catch(() => {});
+      setNotifLivraison(l);
+      setTimeout(() => setNotifLivraison(null), 7000);
+    };
     const onReception = ({ commandeId }) => {
       setCommandes(prev => prev.map(c => c._id === commandeId ? { ...c, receptionConfirmee: true } : c));
     };
@@ -60,12 +66,14 @@ export default function Dashboard() {
     socket.on('maj_boutique', onBoutique);
     socket.on('reception_confirmee', onReception);
     socket.on('avis_commande', onAvis);
+    socket.on('nouvelle_livraison', onLivraison);
     return () => {
       socket.off('nouvelle_commande', onNouvelle);
       socket.off('statut_commande', onStatut);
       socket.off('maj_boutique', onBoutique);
       socket.off('reception_confirmee', onReception);
       socket.off('avis_commande', onAvis);
+      socket.off('nouvelle_livraison', onLivraison);
     };
   }, []);
 
@@ -79,6 +87,20 @@ export default function Dashboard() {
   return (
     <>
       <h1>Tableau de bord</h1>
+
+      {notifLivraison && (
+        <div className="alert alert-success" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>
+            Nouvelle livraison — <strong>{notifLivraison.fournisseurNom}</strong> a déposé{' '}
+            <strong>{notifLivraison.quantite} plateau{notifLivraison.quantite > 1 ? 'x' : ''}</strong> au stock.
+          </span>
+          <button
+            onClick={() => setNotifLivraison(null)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '1.2rem', lineHeight: 1, padding: '0 0 0 12px' }}
+          >×</button>
+        </div>
+      )}
+
       <div className="grid-3">
         <div className="stat-card">
           <div className="value">{aujourd.length}</div>
