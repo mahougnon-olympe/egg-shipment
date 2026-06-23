@@ -22,7 +22,7 @@ export default function Commander({ user }) {
 
   if (!boutique) return <p className="text-muted mt-2">Chargement…</p>;
 
-  const stock = boutique.stock.soldeDisponible;
+  const stockTarif = tarifChoisi?.stockDisponible ?? 0;
   const montantTotal = tarifChoisi ? nbPlateaux * tarifChoisi.prixUnitaire : 0;
 
   const confirmerCommande = async () => {
@@ -57,25 +57,35 @@ export default function Commander({ user }) {
       {etape === 0 && (
         <>
           <h1>Choisir un tarif</h1>
-          {boutique.tarifs.map(t => (
-            <div
-              key={t._id}
-              className="card"
-              onClick={() => setTarifChoisi(t)}
-              style={{
-                cursor: 'pointer',
-                border: tarifChoisi?._id === t._id ? '2px solid #E0A516' : '1px solid rgba(61,47,35,0.12)',
-                background: tarifChoisi?._id === t._id ? 'rgba(224,165,22,0.04)' : undefined,
-                transition: 'border-color 0.15s, background 0.15s',
-              }}
-            >
-              <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>{t.label}</strong>
-              <p style={{ color: '#E0A516', fontWeight: 700, marginTop: 4 }}>
-                {t.prixUnitaire.toLocaleString('fr-FR')} FCFA
-                <span style={{ color: '#8B7355', fontWeight: 400, fontSize: '.875rem' }}> / plateau</span>
-              </p>
-            </div>
-          ))}
+          {boutique.tarifs.map(t => {
+            const rupture = (t.stockDisponible ?? 0) === 0;
+            return (
+              <div
+                key={t._id}
+                className="card"
+                onClick={() => !rupture && setTarifChoisi(t)}
+                style={{
+                  cursor: rupture ? 'not-allowed' : 'pointer',
+                  opacity: rupture ? 0.55 : 1,
+                  border: tarifChoisi?._id === t._id ? '2px solid #E0A516' : '1px solid rgba(61,47,35,0.12)',
+                  background: tarifChoisi?._id === t._id ? 'rgba(224,165,22,0.04)' : undefined,
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}
+              >
+                <div className="flex justify-between items-center">
+                  <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>{t.label}</strong>
+                  {rupture
+                    ? <span style={{ fontSize: '.78rem', fontWeight: 600, color: '#B0413E' }}>Rupture</span>
+                    : <span style={{ fontSize: '.78rem', color: '#8B7355' }}>{t.stockDisponible} dispo</span>
+                  }
+                </div>
+                <p style={{ color: '#E0A516', fontWeight: 700, marginTop: 4 }}>
+                  {t.prixUnitaire.toLocaleString('fr-FR')} FCFA
+                  <span style={{ color: '#8B7355', fontWeight: 400, fontSize: '.875rem' }}> / plateau</span>
+                </p>
+              </div>
+            );
+          })}
           <button className="btn-primary" disabled={!tarifChoisi} onClick={() => setEtape(1)}>Suivant</button>
         </>
       )}
@@ -88,15 +98,15 @@ export default function Commander({ user }) {
               <button className="btn-secondary" style={{ width: 48, height: 48, padding: 0, fontSize: '1.25rem', borderRadius: 12 }}
                 onClick={() => setNbPlateaux(Math.max(1, nbPlateaux - 1))}>−</button>
               <input
-                type="number" min={1} max={stock}
+                type="number" min={1} max={stockTarif}
                 value={nbPlateaux}
-                onChange={e => setNbPlateaux(Math.min(stock, Math.max(1, Number(e.target.value))))}
+                onChange={e => setNbPlateaux(Math.min(stockTarif, Math.max(1, Number(e.target.value))))}
                 style={{ textAlign: 'center', width: 80, fontFamily: "'Fraunces', Georgia, serif", fontSize: '1.5rem', fontWeight: 700 }}
               />
               <button className="btn-secondary" style={{ width: 48, height: 48, padding: 0, fontSize: '1.25rem', borderRadius: 12 }}
-                onClick={() => setNbPlateaux(Math.min(stock, nbPlateaux + 1))}>+</button>
+                onClick={() => setNbPlateaux(Math.min(stockTarif, nbPlateaux + 1))}>+</button>
             </div>
-            <p className="text-muted" style={{ marginTop: 8 }}>Stock : {stock} plateaux disponibles</p>
+            <p className="text-muted" style={{ marginTop: 8 }}>Disponible : {stockTarif} plateau{stockTarif > 1 ? 'x' : ''}</p>
             <p style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: '1.5rem', color: '#E0A516', marginTop: 12 }}>
               {montantTotal.toLocaleString('fr-FR')} FCFA
             </p>

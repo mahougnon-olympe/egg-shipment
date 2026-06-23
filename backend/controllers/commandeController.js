@@ -10,13 +10,12 @@ exports.create = async (req, res) => {
   const tarif = await Tarif.findOne({ _id: tarifId, actif: true });
   if (!tarif) return res.status(400).json({ message: 'Tarif invalide ou inactif' });
 
+  if (tarif.stockDisponible < nbPlateaux) {
+    return res.status(400).json({ message: `Stock insuffisant pour ce tarif, ${tarif.stockDisponible} plateau(x) restant(s)` });
+  }
+
   const vendeur = await User.findById(tarif.vendeurId);
   if (!vendeur) return res.status(400).json({ message: 'Vendeur introuvable' });
-
-  const stock = await Stock.findOne({ vendeurId: vendeur._id });
-  if (!stock || stock.soldeDisponible < nbPlateaux) {
-    return res.status(400).json({ message: `Stock insuffisant, ${stock?.soldeDisponible ?? 0} plateaux restants` });
-  }
 
   if (modeReception === 'livraison' && !lieuLivraison) {
     return res.status(400).json({ message: 'Lieu de livraison requis' });
@@ -42,7 +41,6 @@ exports.create = async (req, res) => {
 
   req.io.emit('nouvelle_commande', commande);
 
-  // Notification push vendeur
   if (vendeur.fcmToken) {
     envoyerNotifVendeur(vendeur.fcmToken, commande).catch(console.error);
   }
@@ -76,23 +74,53 @@ exports.updateStatut = async (req, res) => {
   );
   if (!commande) return res.status(404).json({ message: 'Commande introuvable' });
 
-  // Décrémente le stock quand la commande passe à "confirmée"
   if (statut === 'confirmée') {
-    await Stock.findOneAndUpdate(
-      { vendeurId: req.user._id },
-      { $inc: { soldeDisponible: -commande.nbPlateaux } }
-    );
+    await Promise.all([
+      Stock.findOneAndUpdate(
+        { vendeurId: req.user._id },
+        { $inc: { soldeDisponible: -commande.nbPlateaux } }
+      ),
+      Tarif.findByIdAndUpdate(commande.tarifId, { $inc: { stockDisponible: -commande.nbPlateaux } }),
+    ]);
     req.io.emit('maj_boutique', { type: 'stock_maj' });
   }
 
   req.io.emit('statut_commande', { commandeId: commande._id, statut });
 
-  // Notification push client
   const client = await User.findById(commande.clientId);
   if (client?.fcmToken) {
     const { envoyerNotifClient } = require('../services/fcm');
     envoyerNotifClient(client.fcmToken, commande, statut).catch(console.error);
   }
 
+  res.json(commande);
+};
+
+exports.confirmerReception = async (req, res) => {
+  if (req.user.role !== 'client') return res.status(403).json({ message: 'Réservé au client' });
+
+  const commande = await Commande.findOneAndUpdate(
+    { _id: req.params.id, clientId: req.user._id, statut: 'terminée', receptionConfirmee: false },
+    { receptionConfirmee: true },
+    { new: true }
+  );
+  if (!commande) return res.status(404).json({ message: 'Commande introuvable ou déjà confirmée' });
+
+  req.io.emit('reception_confirmee', { commandeId: commande._id });
+  res.json(commande);
+};
+
+exports.soumettreAvis = async (req, res) => {
+  if (req.user.role !== 'client') return res.status(403).json({ message: 'Réservé au client' });
+
+  const { note, commentaire } = req.body;
+  const commande = await Commande.findOne({ _id: req.params.id, clientId: req.user._id, receptionConfirmee: true });
+  if (!commande) return res.status(404).json({ message: 'Commande introuvable ou réception non confirmée' });
+  if (commande.avis?.note) return res.status(409).json({ message: 'Avis déjà soumis' });
+
+  commande.avis = { note, commentaire: commentaire || '', date: new Date() };
+  await commande.save();
+
+  req.io.emit('avis_commande', { commandeId: commande._id, avis: commande.avis });
   res.json(commande);
 };

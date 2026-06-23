@@ -7,7 +7,11 @@ const validate = require('../middleware/validate');
 router.use(auth, vendeurOnly);
 
 router.get('/', ctrl.list);
-router.post('/', [body('prixUnitaire').isFloat({ min: 0 }), body('label').notEmpty()], validate, ctrl.create);
+router.post('/', [
+  body('prixUnitaire').isFloat({ min: 0 }),
+  body('label').notEmpty(),
+  body('stockDisponible').optional().isInt({ min: 0 }),
+], validate, ctrl.create);
 router.put('/:id', ctrl.update);
 router.delete('/:id', ctrl.remove);
 router.patch('/:id/toggle', ctrl.toggle);

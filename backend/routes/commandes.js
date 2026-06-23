@@ -19,4 +19,10 @@ router.patch('/:id/statut', vendeurOnly, [
   body('statut').isIn(['nouvelle', 'confirmée', 'en_livraison', 'terminée', 'annulée']),
 ], validate, ctrl.updateStatut);
 
+router.patch('/:id/confirmer', ctrl.confirmerReception);
+
+router.post('/:id/avis', [
+  body('note').isInt({ min: 1, max: 5 }),
+], validate, ctrl.soumettreAvis);
+
 module.exports = router;

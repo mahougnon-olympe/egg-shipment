@@ -23,6 +23,7 @@ export default function Accueil() {
   if (!boutique) return <p className="text-muted mt-2">Chargement…</p>;
 
   const { ouvert, stock, tarifs, disponibilites: dispo } = boutique;
+  const auMoinsUnTarifDispo = tarifs.some(t => (t.stockDisponible ?? 0) > 0);
 
   return (
     <div style={{ paddingTop: '1.5rem' }}>
@@ -56,7 +57,17 @@ export default function Accueil() {
         <div className="card flex justify-between items-center" key={t._id}>
           <div>
             <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>{t.label}</strong>
-            <p style={{ color: '#E0A516', fontWeight: 700, marginTop: 2 }}>{t.prixUnitaire.toLocaleString('fr-FR')} FCFA <span style={{ color: '#8B7355', fontWeight: 400, fontSize: '.875rem' }}>/ plateau</span></p>
+            <p style={{ color: '#E0A516', fontWeight: 700, marginTop: 2 }}>
+              {t.prixUnitaire.toLocaleString('fr-FR')} FCFA
+              <span style={{ color: '#8B7355', fontWeight: 400, fontSize: '.875rem' }}> / plateau</span>
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            {t.stockDisponible > 0
+              ? <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, color: '#3A7D44', fontSize: '1.1rem' }}>{t.stockDisponible}</span>
+              : <span style={{ fontWeight: 600, color: '#B0413E', fontSize: '.82rem' }}>Rupture</span>
+            }
+            {t.stockDisponible > 0 && <p style={{ fontSize: '.75rem', color: '#8B7355', marginTop: 1 }}>dispo</p>}
           </div>
         </div>
       ))}
@@ -64,9 +75,9 @@ export default function Accueil() {
       <button
         className="btn-primary mt-2"
         onClick={() => navigate('/commander')}
-        disabled={!ouvert || stock.soldeDisponible === 0}
+        disabled={!ouvert || !auMoinsUnTarifDispo}
       >
-        {!ouvert ? 'Boutique fermée' : stock.soldeDisponible === 0 ? 'Rupture de stock' : 'Commander'}
+        {!ouvert ? 'Boutique fermée' : !auMoinsUnTarifDispo ? 'Rupture de stock' : 'Commander'}
       </button>
     </div>
   );

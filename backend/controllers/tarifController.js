@@ -6,8 +6,8 @@ exports.list = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { prixUnitaire, label } = req.body;
-  const tarif = await Tarif.create({ vendeurId: req.user._id, prixUnitaire, label });
+  const { prixUnitaire, label, stockDisponible } = req.body;
+  const tarif = await Tarif.create({ vendeurId: req.user._id, prixUnitaire, label, stockDisponible: stockDisponible ?? 0 });
   req.io.emit('maj_boutique', { type: 'tarif_ajout', tarif });
   res.status(201).json(tarif);
 };

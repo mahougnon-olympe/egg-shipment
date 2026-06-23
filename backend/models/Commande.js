@@ -18,6 +18,12 @@ const commandeSchema = new mongoose.Schema({
     enum: ['nouvelle', 'confirmée', 'en_livraison', 'terminée', 'annulée'],
     default: 'nouvelle',
   },
+  receptionConfirmee: { type: Boolean, default: false },
+  avis: {
+    note: { type: Number, min: 1, max: 5 },
+    commentaire: { type: String, default: '' },
+    date: { type: Date },
+  },
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = mongoose.model('Commande', commandeSchema);

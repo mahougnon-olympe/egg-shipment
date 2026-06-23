@@ -47,13 +47,23 @@ export default function Dashboard() {
     const onBoutique = ({ type }) => {
       if (type === 'stock_maj') api.get('/stock').then(setStock).catch(() => {});
     };
+    const onReception = ({ commandeId }) => {
+      setCommandes(prev => prev.map(c => c._id === commandeId ? { ...c, receptionConfirmee: true } : c));
+    };
+    const onAvis = ({ commandeId, avis }) => {
+      setCommandes(prev => prev.map(c => c._id === commandeId ? { ...c, avis } : c));
+    };
     socket.on('nouvelle_commande', onNouvelle);
     socket.on('statut_commande', onStatut);
     socket.on('maj_boutique', onBoutique);
+    socket.on('reception_confirmee', onReception);
+    socket.on('avis_commande', onAvis);
     return () => {
       socket.off('nouvelle_commande', onNouvelle);
       socket.off('statut_commande', onStatut);
       socket.off('maj_boutique', onBoutique);
+      socket.off('reception_confirmee', onReception);
+      socket.off('avis_commande', onAvis);
     };
   }, []);
 
@@ -116,6 +126,19 @@ export default function Dashboard() {
               <button className="btn-ghost btn-sm">WhatsApp</button>
             </a>
           </div>
+          {c.avis?.note && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(61,47,35,0.08)' }}>
+              <span style={{ fontSize: '.8rem', color: '#8B7355' }}>Avis client : </span>
+              <span style={{ color: '#E0A516' }}>{'★'.repeat(c.avis.note)}{'☆'.repeat(5 - c.avis.note)}</span>
+              {c.avis.commentaire && <p style={{ fontSize: '.82rem', color: '#8B7355', marginTop: 3 }}>« {c.avis.commentaire} »</p>}
+            </div>
+          )}
+          {c.statut === 'terminée' && !c.receptionConfirmee && (
+            <p style={{ fontSize: '.78rem', color: '#D97706', marginTop: 8 }}>En attente de confirmation client</p>
+          )}
+          {c.receptionConfirmee && !c.avis?.note && (
+            <p style={{ fontSize: '.78rem', color: '#3A7D44', marginTop: 8 }}>Réception confirmée — avis en attente</p>
+          )}
         </div>
       ))}
     </>
