@@ -1,0 +1,61 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { api } from '../services/api';
+
+export default function Inscription({ onLogin }) {
+  const [form, setForm] = useState({ nom: '', prenom: '', whatsapp: '', password: '', confirm: '' });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (form.password !== form.confirm) return setError('Les mots de passe ne correspondent pas');
+    try {
+      const { token, user } = await api.post('/auth/register', {
+        role: 'vendeur',
+        nom: form.nom,
+        prenom: form.prenom,
+        whatsapp: form.whatsapp,
+        password: form.password,
+      });
+      onLogin(token, user);
+      navigate('/');
+    } catch (err) { setError(err.message); }
+  };
+
+  return (
+    <div style={{ maxWidth: 360, margin: '4rem auto' }}>
+      <h1>Créer le compte vendeur</h1>
+      <form onSubmit={submit}>
+        <div className="form-group">
+          <label>Prénom</label>
+          <input value={form.prenom} onChange={set('prenom')} required />
+        </div>
+        <div className="form-group">
+          <label>Nom</label>
+          <input value={form.nom} onChange={set('nom')} required />
+        </div>
+        <div className="form-group">
+          <label>WhatsApp</label>
+          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={set('whatsapp')} required />
+        </div>
+        <div className="form-group">
+          <label>Mot de passe</label>
+          <input type="password" value={form.password} onChange={set('password')} required />
+        </div>
+        <div className="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" value={form.confirm} onChange={set('confirm')} required />
+        </div>
+        {error && <p style={{ color: '#EF4444', marginBottom: '.5rem' }}>{error}</p>}
+        <button type="submit" className="btn-primary" style={{ width: '100%' }}>Créer le compte</button>
+      </form>
+      <p style={{ marginTop: '1rem', textAlign: 'center' }}>
+        Déjà un compte ? <Link to="/login">Se connecter</Link>
+      </p>
+    </div>
+  );
+}

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { socket } from './socket';
 import Login from './pages/Login';
+import Inscription from './pages/Inscription';
 import Dashboard from './pages/Dashboard';
 import Commandes from './pages/Commandes';
 import Stock from './pages/Stock';
@@ -46,6 +47,7 @@ export default function App() {
       <main className="main">
         <Routes>
           <Route path="/login" element={<Login onLogin={login} />} />
+          <Route path="/inscription" element={<Inscription onLogin={login} />} />
           <Route path="/" element={<ProtectedRoute user={user}><Dashboard /></ProtectedRoute>} />
           <Route path="/commandes" element={<ProtectedRoute user={user}><Commandes /></ProtectedRoute>} />
           <Route path="/stock" element={<ProtectedRoute user={user}><Stock /></ProtectedRoute>} />

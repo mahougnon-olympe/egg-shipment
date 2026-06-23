@@ -10,6 +10,11 @@ const signToken = (id) =>
 exports.register = async (req, res) => {
   const { role, nom, prenom, whatsapp, email, password } = req.body;
 
+  if (role === 'vendeur') {
+    const vendeurExiste = await User.findOne({ role: 'vendeur' });
+    if (vendeurExiste) return res.status(409).json({ message: 'Un compte vendeur existe déjà' });
+  }
+
   const exists = await User.findOne({ whatsapp });
   if (exists) return res.status(409).json({ message: 'Ce numéro WhatsApp est déjà utilisé' });
 
