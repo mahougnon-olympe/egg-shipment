@@ -25,7 +25,10 @@ export default function Nav({ user, onLogout }) {
             {label}
           </Link>
         ))}
-        <button onClick={onLogout} style={{ background: 'none', color: '#8B7355', fontWeight: 500, padding: 0, fontSize: '.85rem', borderRadius: 0 }}>
+        <button
+          onClick={() => { if (window.confirm('Se déconnecter ?')) onLogout(); }}
+          style={{ background: 'none', color: '#8B7355', fontWeight: 500, padding: 0, fontSize: '.85rem', borderRadius: 0 }}
+        >
           Déco
         </button>
       </div>
