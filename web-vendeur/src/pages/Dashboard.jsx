@@ -32,6 +32,8 @@ export default function Dashboard() {
 
   const changerStatut = async (id, statut) => {
     await api.patch(`/commandes/${id}/statut`, { statut });
+    setCommandes(prev => prev.map(c => c._id === id ? { ...c, statut } : c));
+    if (statut === 'confirmée') charger();
   };
 
   useEffect(() => {
