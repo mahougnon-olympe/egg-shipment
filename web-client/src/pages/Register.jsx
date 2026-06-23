@@ -46,8 +46,9 @@ export default function Register({ onLogin }) {
           </div>
         ))}
         <div className="form-group">
-          <label>Numéro WhatsApp *</label>
-          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <label>Numéro de téléphone</label>
+          <input placeholder="+229 01 XX XX XX XX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <small style={{ color: '#8B7355', fontSize: '.8rem' }}>De préférence votre numéro WhatsApp — le vendeur pourra vous contacter par WhatsApp.</small>
         </div>
         <div className="form-group">
           <label>Email (optionnel)</label>

@@ -35,8 +35,9 @@ export default function Login({ onLogin }) {
       <h1>Connexion fournisseur</h1>
       <form onSubmit={submit}>
         <div className="form-group">
-          <label>WhatsApp</label>
-          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <label>Numéro de téléphone</label>
+          <input placeholder="+229 01 XX XX XX XX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <small style={{ color: '#8B7355', fontSize: '.8rem' }}>Le numéro utilisé lors de l'inscription.</small>
         </div>
         <div className="form-group">
           <label>Mot de passe</label>

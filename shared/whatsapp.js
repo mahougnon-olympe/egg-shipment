@@ -4,6 +4,13 @@ export const lienWhatsApp = (numero, message) => {
   return `https://wa.me/${num}?text=${texte}`;
 };
 
+export const lienAppel = (numero) => `tel:${numero.replace(/\s/g, '')}`;
+
+export const lienSMS = (numero, message = '') => {
+  const num = numero.replace(/\s/g, '');
+  return message ? `sms:${num}?body=${encodeURIComponent(message)}` : `sms:${num}`;
+};
+
 export const messageCommande = (commande, adresseRetrait = '') => {
   const mode = commande.modeReception === 'livraison'
     ? `Livraison\nLieu : ${commande.lieuLivraison}`

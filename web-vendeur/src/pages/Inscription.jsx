@@ -53,8 +53,9 @@ export default function Inscription({ onLogin }) {
           <input value={form.nom} onChange={set('nom')} required />
         </div>
         <div className="form-group">
-          <label>WhatsApp</label>
-          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <label>Numéro de téléphone</label>
+          <input placeholder="+229 01 XX XX XX XX" value={form.whatsapp} onChange={set('whatsapp')} required />
+          <small style={{ color: '#8B7355', fontSize: '.8rem' }}>De préférence votre numéro WhatsApp — les clients pourront vous contacter par WhatsApp.</small>
         </div>
         <div className="form-group">
           <label>Mot de passe</label>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { socket } from '../socket';
-import { lienWhatsApp } from '../../../shared/whatsapp';
+import { lienWhatsApp, lienAppel, lienSMS } from '../../../shared/whatsapp';
 
 const STATUTS = {
   nouvelle: { label: 'Nouvelle', bg: '#3B82F6' },
@@ -64,7 +64,13 @@ export default function Commandes() {
               </button>
             ))}
             <a href={lienWhatsApp(c.clientWhatsapp, `Bonjour ${c.clientPrenom} !`)} target="_blank" rel="noopener noreferrer">
-              <button className="btn-ghost btn-sm">WhatsApp ({c.clientWhatsapp})</button>
+              <button className="btn-ghost btn-sm">WhatsApp</button>
+            </a>
+            <a href={lienAppel(c.clientWhatsapp)}>
+              <button className="btn-ghost btn-sm">Appel</button>
+            </a>
+            <a href={lienSMS(c.clientWhatsapp, `Bonjour ${c.clientPrenom} !`)}>
+              <button className="btn-ghost btn-sm">SMS</button>
             </a>
           </div>
         </div>
