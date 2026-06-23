@@ -2,24 +2,38 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
+const KEY = 'form_register_client';
+const FIELDS = ['nom', 'prenom', 'whatsapp', 'email'];
+
 export default function Register({ onLogin }) {
-  const [form, setForm] = useState({ nom: '', prenom: '', whatsapp: '', email: '', password: '' });
+  const [form, setForm] = useState(() => {
+    try { return { ...{ nom: '', prenom: '', whatsapp: '', email: '', password: '' }, ...JSON.parse(sessionStorage.getItem(KEY) || '{}'), password: '' }; }
+    catch { return { nom: '', prenom: '', whatsapp: '', email: '', password: '' }; }
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const set = (field) => (e) => {
+    const next = { ...form, [field]: e.target.value };
+    setForm(next);
+    if (field !== 'password') {
+      const saved = Object.fromEntries(FIELDS.map(k => [k, next[k]]));
+      sessionStorage.setItem(KEY, JSON.stringify(saved));
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
     setError('');
     try {
       const { token, user } = await api.post('/auth/register', { ...form, role: 'client' });
+      sessionStorage.removeItem(KEY);
       onLogin(token, user);
       navigate('/');
     } catch (err) {
       setError(err.message);
     }
   };
-
-  const f = (field) => ({ value: form[field], onChange: (e) => setForm({ ...form, [field]: e.target.value }) });
 
   return (
     <div style={{ paddingTop: '2rem' }}>
@@ -28,20 +42,20 @@ export default function Register({ onLogin }) {
         {[['Prénom', 'prenom'], ['Nom', 'nom']].map(([label, key]) => (
           <div className="form-group" key={key}>
             <label>{label}</label>
-            <input {...f(key)} required />
+            <input value={form[key]} onChange={set(key)} required />
           </div>
         ))}
         <div className="form-group">
           <label>Numéro WhatsApp *</label>
-          <input placeholder="+229XXXXXXXX" {...f('whatsapp')} required />
+          <input placeholder="+229XXXXXXXX" value={form.whatsapp} onChange={set('whatsapp')} required />
         </div>
         <div className="form-group">
           <label>Email (optionnel)</label>
-          <input type="email" {...f('email')} />
+          <input type="email" value={form.email} onChange={set('email')} />
         </div>
         <div className="form-group">
           <label>Mot de passe</label>
-          <input type="password" {...f('password')} required minLength={6} />
+          <input type="password" value={form.password} onChange={set('password')} required minLength={6} />
         </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" className="btn-primary">Créer mon compte</button>

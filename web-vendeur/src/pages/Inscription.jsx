@@ -2,12 +2,25 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 
+const KEY = 'form_inscription_vendeur';
+const FIELDS = ['nom', 'prenom', 'whatsapp'];
+
 export default function Inscription({ onLogin }) {
-  const [form, setForm] = useState({ nom: '', prenom: '', whatsapp: '', password: '', confirm: '' });
+  const [form, setForm] = useState(() => {
+    try { return { ...{ nom: '', prenom: '', whatsapp: '', password: '', confirm: '' }, ...JSON.parse(sessionStorage.getItem(KEY) || '{}'), password: '', confirm: '' }; }
+    catch { return { nom: '', prenom: '', whatsapp: '', password: '', confirm: '' }; }
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  const set = (field) => (e) => {
+    const next = { ...form, [field]: e.target.value };
+    setForm(next);
+    if (!['password', 'confirm'].includes(field)) {
+      const saved = Object.fromEntries(FIELDS.map(k => [k, next[k]]));
+      sessionStorage.setItem(KEY, JSON.stringify(saved));
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -21,6 +34,7 @@ export default function Inscription({ onLogin }) {
         whatsapp: form.whatsapp,
         password: form.password,
       });
+      sessionStorage.removeItem(KEY);
       onLogin(token, user);
       navigate('/');
     } catch (err) { setError(err.message); }
