@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { lienWhatsApp, messageCommande } from '../../../shared/whatsapp';
 
-const ETAPES = ['tarif', 'quantite', 'reception', 'recap', 'confirmation'];
+const ETAPES = ['tarif', 'quantite', 'reception', 'paiement', 'recap', 'confirmation'];
+
+const LABELS_PAIEMENT = {
+  mobile_money: 'Mobile Money',
+  liquide: 'Espèces (liquide)',
+};
 
 export default function Commander({ user }) {
   const [etape, setEtape] = useState(0);
@@ -12,6 +17,7 @@ export default function Commander({ user }) {
   const [nbPlateaux, setNbPlateaux] = useState(1);
   const [modeReception, setModeReception] = useState('livraison');
   const [lieuLivraison, setLieuLivraison] = useState('');
+  const [modePaiement, setModePaiement] = useState('');
   const [commande, setCommande] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -24,6 +30,7 @@ export default function Commander({ user }) {
 
   const stockTarif = tarifChoisi?.stockDisponible ?? 0;
   const montantTotal = tarifChoisi ? nbPlateaux * tarifChoisi.prixUnitaire : 0;
+  const modesPaiement = boutique.disponibilites?.modesPaiement || [];
 
   const confirmerCommande = async () => {
     setError('');
@@ -33,9 +40,10 @@ export default function Commander({ user }) {
         nbPlateaux,
         modeReception,
         lieuLivraison: modeReception === 'livraison' ? lieuLivraison : undefined,
+        modePaiement,
       });
       setCommande({ ...c, tarifLabel: tarifChoisi.label, clientPrenom: user.prenom, clientNom: user.nom, clientWhatsapp: user.whatsapp });
-      setEtape(4);
+      setEtape(5);
     } catch (e) {
       setError(e.message);
     }
@@ -45,7 +53,7 @@ export default function Commander({ user }) {
     <div style={{ paddingTop: '1.5rem' }}>
       {/* Barre de progression */}
       <div style={{ display: 'flex', gap: 5, marginBottom: '1.75rem' }}>
-        {ETAPES.slice(0, 4).map((_, i) => (
+        {ETAPES.slice(0, 5).map((_, i) => (
           <div key={i} style={{
             flex: 1, height: 3, borderRadius: 3,
             background: i <= etape ? '#E0A516' : 'rgba(61,47,35,0.12)',
@@ -54,6 +62,7 @@ export default function Commander({ user }) {
         ))}
       </div>
 
+      {/* Étape 0 : tarif */}
       {etape === 0 && (
         <>
           <h1>Choisir un tarif</h1>
@@ -90,6 +99,7 @@ export default function Commander({ user }) {
         </>
       )}
 
+      {/* Étape 1 : quantité */}
       {etape === 1 && (
         <>
           <h1>Quantité</h1>
@@ -115,6 +125,7 @@ export default function Commander({ user }) {
         </>
       )}
 
+      {/* Étape 2 : réception */}
       {etape === 2 && (
         <>
           <h1>Mode de réception</h1>
@@ -147,15 +158,54 @@ export default function Commander({ user }) {
         </>
       )}
 
+      {/* Étape 3 : paiement */}
       {etape === 3 && (
+        <>
+          <h1>Mode de paiement</h1>
+          {modesPaiement.length === 0 ? (
+            <div className="card">
+              <p className="text-muted">Le vendeur n'a pas encore configuré ses modes de paiement. Continuez et contactez-le sur WhatsApp.</p>
+            </div>
+          ) : (
+            modesPaiement.map(m => (
+              <div
+                key={m}
+                className="card"
+                onClick={() => setModePaiement(m)}
+                style={{
+                  cursor: 'pointer',
+                  border: modePaiement === m ? '2px solid #E0A516' : '1px solid rgba(61,47,35,0.12)',
+                  background: modePaiement === m ? 'rgba(224,165,22,0.04)' : undefined,
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}
+              >
+                <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>
+                  {LABELS_PAIEMENT[m] || m}
+                </strong>
+              </div>
+            ))
+          )}
+          <button
+            className="btn-primary"
+            disabled={modesPaiement.length > 0 && !modePaiement}
+            onClick={() => setEtape(4)}
+          >
+            Suivant
+          </button>
+        </>
+      )}
+
+      {/* Étape 4 : récapitulatif */}
+      {etape === 4 && (
         <>
           <h1>Récapitulatif</h1>
           <div className="card">
             {[
               ['Tarif', `${tarifChoisi.label} — ${tarifChoisi.prixUnitaire.toLocaleString('fr-FR')} FCFA/plateau`],
               ['Quantité', `${nbPlateaux} plateau${nbPlateaux > 1 ? 'x' : ''}`],
-              ['Mode', modeReception === 'livraison' ? 'Livraison' : 'Retrait'],
+              ['Réception', modeReception === 'livraison' ? 'Livraison' : 'Retrait'],
               ...(modeReception === 'livraison' ? [['Lieu', lieuLivraison]] : []),
+              ...(modePaiement ? [['Paiement', LABELS_PAIEMENT[modePaiement] || modePaiement]] : []),
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between" style={{ padding: '6px 0', borderBottom: '1px solid rgba(61,47,35,0.07)' }}>
                 <span className="text-muted">{k}</span>
@@ -174,20 +224,19 @@ export default function Commander({ user }) {
         </>
       )}
 
-      {etape === 4 && commande && (
+      {/* Étape 5 : confirmation */}
+      {etape === 5 && commande && (
         <>
           <h1>Commande enregistrée</h1>
           <div className="card" style={{ textAlign: 'center', padding: '2rem 1.25rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ display: 'block', margin: '0 auto' }}>
-                <circle cx="24" cy="24" r="23" stroke="#3A7D44" strokeWidth="2"/>
-                <path d="M14 24L21 31L34 17" stroke="#3A7D44" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ display: 'block', margin: '0 auto 1rem' }}>
+              <circle cx="24" cy="24" r="23" stroke="#3A7D44" strokeWidth="2"/>
+              <path d="M14 24L21 31L34 17" stroke="#3A7D44" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <p style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '1.15rem', fontWeight: 600, marginBottom: 8 }}>
               Commande enregistrée !
             </p>
-            <p className="text-muted">En attente de confirmation. Contactez le vendeur pour finaliser le paiement.</p>
+            <p className="text-muted">En attente de confirmation du vendeur.</p>
           </div>
           <a
             href={lienWhatsApp(boutique.vendeur.whatsapp, messageCommande(commande, boutique.disponibilites?.adressePointVente))}

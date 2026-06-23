@@ -6,10 +6,10 @@ exports.get = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const { jours, heureDebut, heureFin, adressePointVente } = req.body;
+  const { jours, heureDebut, heureFin, adressePointVente, modesPaiement } = req.body;
   const dispo = await Disponibilite.findOneAndUpdate(
     { vendeurId: req.user._id },
-    { jours, heureDebut, heureFin, adressePointVente },
+    { jours, heureDebut, heureFin, adressePointVente, modesPaiement: modesPaiement || [] },
     { new: true, upsert: true }
   );
   req.io.emit('maj_boutique', { type: 'dispo_maj', dispo });

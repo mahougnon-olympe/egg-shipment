@@ -10,6 +10,7 @@ const disponibiliteSchema = new mongoose.Schema({
   heureDebut: { type: String, default: '08:00' },
   heureFin: { type: String, default: '18:00' },
   adressePointVente: { type: String, default: '' },
+  modesPaiement: { type: [String], default: [] },
 });
 
 module.exports = mongoose.model('Disponibilite', disponibiliteSchema);

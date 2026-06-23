@@ -117,6 +117,11 @@ export default function Dashboard() {
           </p>
           <p className="text-muted" style={{ marginTop: 2 }}>
             {c.modeReception === 'livraison' ? `Livraison : ${c.lieuLivraison}` : 'Retrait sur place'}
+            {c.modePaiement && (
+              <span style={{ marginLeft: 8 }}>
+                · {c.modePaiement === 'mobile_money' ? 'Mobile Money' : c.modePaiement === 'liquide' ? 'Espèces' : c.modePaiement}
+              </span>
+            )}
           </p>
           <div className="flex gap-1" style={{ marginTop: 10, flexWrap: 'wrap' }}>
             {(TRANSITIONS[c.statut] || []).map(s => (

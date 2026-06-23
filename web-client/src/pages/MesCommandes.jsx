@@ -57,6 +57,9 @@ function CarteCommande({ c, onConfirmer, onAvis }) {
       </div>
       <p className="text-muted" style={{ marginTop: 6 }}>
         {c.tarifLabel} · {c.modeReception === 'livraison' ? `Livraison : ${c.lieuLivraison}` : 'Retrait sur place'}
+        {c.modePaiement && (
+          <span> · {c.modePaiement === 'mobile_money' ? 'Mobile Money' : c.modePaiement === 'liquide' ? 'Espèces' : c.modePaiement}</span>
+        )}
       </p>
       <p style={{ color: '#8B7355', fontSize: '.8rem', marginTop: 4 }}>{new Date(c.createdAt).toLocaleString('fr-FR')}</p>
 

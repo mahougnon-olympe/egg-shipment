@@ -12,6 +12,7 @@ const commandeSchema = new mongoose.Schema({
   nbPlateaux: { type: Number, required: true, min: 1 },
   montantTotal: { type: Number, required: true },
   modeReception: { type: String, enum: ['livraison', 'retrait'], required: true },
+  modePaiement: { type: String, default: '' },
   lieuLivraison: { type: String, default: null },
   statut: {
     type: String,

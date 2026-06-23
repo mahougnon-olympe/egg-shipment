@@ -5,7 +5,7 @@ const User = require('../models/User');
 const { envoyerNotifVendeur } = require('../services/fcm');
 
 exports.create = async (req, res) => {
-  const { tarifId, nbPlateaux, modeReception, lieuLivraison } = req.body;
+  const { tarifId, nbPlateaux, modeReception, lieuLivraison, modePaiement } = req.body;
 
   const tarif = await Tarif.findOne({ _id: tarifId, actif: true });
   if (!tarif) return res.status(400).json({ message: 'Tarif invalide ou inactif' });
@@ -37,6 +37,7 @@ exports.create = async (req, res) => {
     montantTotal,
     modeReception,
     lieuLivraison: modeReception === 'livraison' ? lieuLivraison : null,
+    modePaiement: modePaiement || '',
   });
 
   req.io.emit('nouvelle_commande', commande);
