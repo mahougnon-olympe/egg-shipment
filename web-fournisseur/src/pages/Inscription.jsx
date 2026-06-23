@@ -66,6 +66,10 @@ export default function Inscription({ onLogin }) {
           <label>Confirmer le mot de passe</label>
           <input type="password" value={form.confirm} onChange={set('confirm')} required />
         </div>
+        <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
+          Attention — une fois le compte créé, votre nom, numéro WhatsApp et mot de passe ne pourront plus être modifiés.
+          Vérifiez bien vos informations avant de valider.
+        </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" className="btn-primary" style={{ width: '100%' }}>Créer le compte</button>
       </form>
