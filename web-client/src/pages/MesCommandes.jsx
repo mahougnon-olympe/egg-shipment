@@ -3,11 +3,11 @@ import { api } from '../services/api';
 import { socket } from '../socket';
 
 const STATUTS = {
-  nouvelle: { label: 'Nouvelle', bg: '#3B82F6' },
-  confirmée: { label: 'Confirmée', bg: '#10B981' },
-  en_livraison: { label: 'En livraison', bg: '#F59E0B' },
-  terminée: { label: 'Terminée', bg: '#6B7280' },
-  annulée: { label: 'Annulée', bg: '#EF4444' },
+  nouvelle:     { label: 'Nouvelle',     bg: '#E0A516' },
+  confirmée:    { label: 'Confirmée',    bg: '#3A7D44' },
+  en_livraison: { label: 'En livraison', bg: '#D97706' },
+  terminée:     { label: 'Terminée',     bg: '#8B7355' },
+  annulée:      { label: 'Annulée',      bg: '#B0413E' },
 };
 
 export default function MesCommandes() {
@@ -24,7 +24,7 @@ export default function MesCommandes() {
     return () => socket.off('statut_commande', onStatut);
   }, []);
 
-  if (!commandes.length) return <p style={{ paddingTop: '2rem', color: '#9CA3AF' }}>Aucune commande pour l'instant.</p>;
+  if (!commandes.length) return <p className="text-muted" style={{ paddingTop: '2rem' }}>Aucune commande pour l'instant.</p>;
 
   return (
     <div style={{ paddingTop: '1.5rem' }}>
@@ -32,15 +32,17 @@ export default function MesCommandes() {
       {commandes.map(c => (
         <div className="card" key={c._id}>
           <div className="flex justify-between items-center">
-            <strong>{c.nbPlateaux} plateau{c.nbPlateaux > 1 ? 'x' : ''} · {c.montantTotal.toLocaleString('fr-FR')} FCFA</strong>
-            <span className="badge" style={{ background: STATUTS[c.statut]?.bg || '#9CA3AF' }}>
+            <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>
+              {c.nbPlateaux} plateau{c.nbPlateaux > 1 ? 'x' : ''} · {c.montantTotal.toLocaleString('fr-FR')} FCFA
+            </strong>
+            <span className="badge" style={{ background: STATUTS[c.statut]?.bg || '#8B7355' }}>
               {STATUTS[c.statut]?.label || c.statut}
             </span>
           </div>
-          <p style={{ color: '#6B7280', fontSize: '.85rem', marginTop: 4 }}>
+          <p className="text-muted" style={{ marginTop: 6 }}>
             {c.tarifLabel} · {c.modeReception === 'livraison' ? `Livraison : ${c.lieuLivraison}` : 'Retrait sur place'}
           </p>
-          <p style={{ color: '#9CA3AF', fontSize: '.8rem' }}>{new Date(c.createdAt).toLocaleString('fr-FR')}</p>
+          <p style={{ color: '#8B7355', fontSize: '.8rem', marginTop: 4 }}>{new Date(c.createdAt).toLocaleString('fr-FR')}</p>
         </div>
       ))}
     </div>

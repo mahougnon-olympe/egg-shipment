@@ -20,42 +20,43 @@ export default function Accueil() {
   }, []);
 
   if (error) return <p className="error mt-2">{error}</p>;
-  if (!boutique) return <p className="mt-2">Chargement…</p>;
+  if (!boutique) return <p className="text-muted mt-2">Chargement…</p>;
 
-  const { vendeur, ouvert, stock, tarifs, disponibilites: dispo } = boutique;
+  const { ouvert, stock, tarifs, disponibilites: dispo } = boutique;
 
   return (
     <div style={{ paddingTop: '1.5rem' }}>
-      <h1>🥚 Boutique œufs</h1>
+      <h1>Boutique œufs frais</h1>
 
       <div className="card">
         <div className="flex justify-between items-center">
           <span style={{ fontWeight: 600 }}>Statut</span>
-          <span className="badge" style={{ background: ouvert ? '#10B981' : '#EF4444' }}>
+          <span className="badge" style={{ background: ouvert ? '#3A7D44' : '#B0413E' }}>
             {ouvert ? 'Ouvert' : 'Fermé'}
           </span>
         </div>
         {dispo && (
-          <p style={{ color: '#6B7280', fontSize: '.85rem', marginTop: 4 }}>
+          <p className="text-muted" style={{ marginTop: 6 }}>
             {dispo.jours.join(', ')} · {dispo.heureDebut} – {dispo.heureFin}
           </p>
         )}
       </div>
 
       <div className="card">
-        <span style={{ fontWeight: 600 }}>Stock disponible</span>
-        <p style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F97316', marginTop: 4 }}>
-          {stock.soldeDisponible} plateau{stock.soldeDisponible > 1 ? 'x' : ''}
+        <span style={{ fontWeight: 600, fontSize: '.875rem', color: '#8B7355', textTransform: 'uppercase', letterSpacing: '.04em' }}>Stock disponible</span>
+        <p style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '2rem', fontWeight: 700, color: '#E0A516', marginTop: 4, lineHeight: 1 }}>
+          {stock.soldeDisponible}
+          <span style={{ fontSize: '1rem', fontWeight: 400, color: '#8B7355', marginLeft: 6 }}>plateau{stock.soldeDisponible > 1 ? 'x' : ''}</span>
         </p>
       </div>
 
       <h2>Tarifs disponibles</h2>
-      {tarifs.length === 0 && <p style={{ color: '#9CA3AF' }}>Aucun tarif actif pour le moment.</p>}
+      {tarifs.length === 0 && <p className="text-muted">Aucun tarif actif pour le moment.</p>}
       {tarifs.map(t => (
         <div className="card flex justify-between items-center" key={t._id}>
           <div>
-            <strong>{t.label}</strong>
-            <p style={{ color: '#F97316', fontWeight: 700 }}>{t.prixUnitaire.toLocaleString('fr-FR')} FCFA / plateau</p>
+            <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>{t.label}</strong>
+            <p style={{ color: '#E0A516', fontWeight: 700, marginTop: 2 }}>{t.prixUnitaire.toLocaleString('fr-FR')} FCFA <span style={{ color: '#8B7355', fontWeight: 400, fontSize: '.875rem' }}>/ plateau</span></p>
           </div>
         </div>
       ))}

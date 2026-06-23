@@ -4,16 +4,16 @@ import { socket } from '../socket';
 import { lienWhatsApp } from '../../../shared/whatsapp';
 
 const STATUTS = {
-  nouvelle: { label: 'Nouvelle', bg: '#3B82F6' },
-  confirmée: { label: 'Confirmée', bg: '#10B981' },
-  en_livraison: { label: 'En livraison', bg: '#F59E0B' },
-  terminée: { label: 'Terminée', bg: '#6B7280' },
-  annulée: { label: 'Annulée', bg: '#EF4444' },
+  nouvelle:     { label: 'Nouvelle',     bg: '#E0A516' },
+  confirmée:    { label: 'Confirmée',    bg: '#3A7D44' },
+  en_livraison: { label: 'En livraison', bg: '#D97706' },
+  terminée:     { label: 'Terminée',     bg: '#8B7355' },
+  annulée:      { label: 'Annulée',      bg: '#B0413E' },
 };
 
 const TRANSITIONS = {
-  nouvelle: ['confirmée', 'annulée'],
-  confirmée: ['en_livraison', 'annulée'],
+  nouvelle:     ['confirmée', 'annulée'],
+  confirmée:    ['en_livraison', 'annulée'],
   en_livraison: ['terminée', 'annulée'],
 };
 
@@ -60,6 +60,10 @@ export default function Dashboard() {
   const aujourd = commandes.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString());
   const totalJour = aujourd.filter(c => c.statut !== 'annulée').reduce((s, c) => s + c.montantTotal, 0);
 
+  const stockColor = stock
+    ? stock.soldeDisponible <= stock.seuilAlerte ? '#B0413E' : '#E0A516'
+    : '#E0A516';
+
   return (
     <>
       <h1>Tableau de bord</h1>
@@ -73,15 +77,13 @@ export default function Dashboard() {
           <div className="label">FCFA attendus</div>
         </div>
         <div className="stat-card">
-          <div className="value" style={{ color: stock?.soldeDisponible <= (stock?.seuilAlerte || 10) ? '#EF4444' : '#F97316' }}>
-            {stock?.soldeDisponible ?? '—'}
-          </div>
+          <div className="value" style={{ color: stockColor }}>{stock?.soldeDisponible ?? '—'}</div>
           <div className="label">Plateaux en stock</div>
         </div>
       </div>
 
       {stock && stock.soldeDisponible <= stock.seuilAlerte && (
-        <div className="alert alert-warning">Stock bas ! Il reste {stock.soldeDisponible} plateau(x).</div>
+        <div className="alert alert-warning">Stock bas — il reste {stock.soldeDisponible} plateau(x).</div>
       )}
 
       <h2>Commandes récentes</h2>
@@ -90,17 +92,24 @@ export default function Dashboard() {
         <div className="card" key={c._id}>
           <div className="flex justify-between items-center" style={{ marginBottom: 8 }}>
             <div>
-              <strong>{c.clientPrenom} {c.clientNom}</strong>
-              <span className="text-muted" style={{ marginLeft: 8 }}>{new Date(c.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+              <strong style={{ fontFamily: "'Fraunces', Georgia, serif" }}>{c.clientPrenom} {c.clientNom}</strong>
+              <span className="text-muted" style={{ marginLeft: 8, fontSize: '.8rem' }}>
+                {new Date(c.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
             <span className="badge" style={{ background: STATUTS[c.statut]?.bg }}>{STATUTS[c.statut]?.label}</span>
           </div>
-          <p>{c.nbPlateaux} plateau{c.nbPlateaux > 1 ? 'x' : ''} · {c.tarifLabel} · <strong>{c.montantTotal.toLocaleString('fr-FR')} FCFA</strong></p>
-          <p className="text-muted">{c.modeReception === 'livraison' ? `Livraison : ${c.lieuLivraison}` : 'Retrait sur place'}</p>
-          <div className="flex gap-1" style={{ marginTop: 8, flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '.9rem' }}>
+            {c.nbPlateaux} plateau{c.nbPlateaux > 1 ? 'x' : ''} · {c.tarifLabel} ·{' '}
+            <strong style={{ color: '#E0A516' }}>{c.montantTotal.toLocaleString('fr-FR')} FCFA</strong>
+          </p>
+          <p className="text-muted" style={{ marginTop: 2 }}>
+            {c.modeReception === 'livraison' ? `Livraison : ${c.lieuLivraison}` : 'Retrait sur place'}
+          </p>
+          <div className="flex gap-1" style={{ marginTop: 10, flexWrap: 'wrap' }}>
             {(TRANSITIONS[c.statut] || []).map(s => (
               <button key={s} className="btn-primary btn-sm" onClick={() => changerStatut(c._id, s)}>
-                → {STATUTS[s]?.label}
+                {STATUTS[s]?.label}
               </button>
             ))}
             <a href={lienWhatsApp(c.clientWhatsapp, `Bonjour ${c.clientPrenom}, votre commande de ${c.nbPlateaux} plateau(x) est ${STATUTS[c.statut]?.label?.toLowerCase()}.`)} target="_blank" rel="noopener noreferrer">
