@@ -12,6 +12,11 @@ async function request(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json();
+  if (res.status === 401) {
+    localStorage.clear();
+    window.location.href = '/login';
+    return;
+  }
   if (!res.ok) throw new Error(data.message || 'Erreur serveur');
   return data;
 }
